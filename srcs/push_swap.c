@@ -6,8 +6,16 @@
 /*   By: tpotier <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/05/02 16:58:02 by tpotier           #+#    #+#             */
-/*   Updated: 2019/05/02 16:58:03 by tpotier          ###   ########.fr       */
+/*   Updated: 2019/05/02 19:10:32 by tpotier          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
+#include "libft.h"
 
+int		main(int ac, char **av)
+{
+	(void)av;
+	ft_putnbr(ac);
+	ft_putchar('\n');
+	return (0);
+}

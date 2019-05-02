@@ -6,23 +6,25 @@
 #    By: tpotier <marvin@42.fr>                     +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2019/04/01 16:36:41 by tpotier           #+#    #+#              #
-#    Updated: 2019/05/02 16:57:14 by tpotier          ###   ########.fr        #
+#    Updated: 2019/05/02 19:58:52 by tpotier          ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
 CC = gcc
-FILES1 = push_swap
-IFILES1 = push_swap.h
-FILES2 = checker
-IFILES2 = checker.h
+FILES1 = checker
+IFILES1 = checker.h
+FILES2 = push_swap
+IFILES2 = push_swap.h
 NAME1 = checker
 NAME2 = push_swap
 IDIR = incs/
 SDIR = srcs/
 LIBFTDIR = libft/
 LIBFT = $(LIBFTDIR)libft.a
-LIBFTINC = $(LIBFTDIR)
+LIBFTINC = $(LIBFTDIR)incs/
 CFLAGS = -Wall -Wextra -Werror -I$(IDIR) -I$(LIBFTINC) -MMD -MP
+CFLAGSF = $(CFLAGS) -L$(LIBFTDIR) -lft
+
 
 SRCS1 = $(addprefix $(SDIR), $(addsuffix .c, $(FILES1)))
 INCS1 = $(addprefix $(IDIR), $(IFILES1))
@@ -36,13 +38,13 @@ DEPS2 = $(SRCS2:.c=.d)
 all: $(NAME1) $(NAME2)
 
 $(LIBFT):
-	make -C $(LIBFTDIR) libft.a
+	make -C $(LIBFTDIR)
 
 $(NAME1): $(OBJS1) $(LIBFT)
-	$(CC) $(CFLAGS) -o $@ $(OBJS1)
+	$(CC) $(CFLAGSF) -o $@ $(OBJS1)
 
 $(NAME2): $(OBJS2) $(LIBFT)
-	$(CC) $(CFLAGS) -o $@ $(OBJS2)
+	$(CC) $(CFLAGSF) -o $@ $(OBJS2)
 
 %.o: %.c
 	$(CC) -o $@ -c $< $(CFLAGS)
