@@ -6,11 +6,11 @@
 /*   By: tpotier <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/05/02 16:58:11 by tpotier           #+#    #+#             */
-/*   Updated: 2019/05/02 20:21:02 by tpotier          ###   ########.fr       */
+/*   Updated: 2019/05/05 16:11:18 by tpotier          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "libft.h"
+#include "push_swap.h"
 
 int		do_ops(t_sstack *sa, t_sstack *sb)
 {
@@ -41,17 +41,18 @@ int		do_ops(t_sstack *sa, t_sstack *sb)
 		else if (ft_strequ("rrb", buff) || ft_strequ("rrr", buff))
 			ft_sstkrrot(sb);
 		else if (*buff)
-		{
-			ft_putendl(buff);
 			return (0);
-		}
-		ft_putstr("Stack a:\n");
-		ft_sstkdisp(sa);
-		ft_putstr("Stack b:\n");
-		ft_sstkdisp(sb);
 		free(buff);
 	}
 	return (1);
+}
+
+void	disp_stack(t_sstack *sa, t_sstack *sb)
+{
+	ft_putstr("Stack a:\n");
+	ft_sstkdisp(sa);
+	ft_putstr("Stack b:\n");
+	ft_sstkdisp(sb);
 }
 
 void	fill_stack(int ac, char **av, t_sstack *sa)
@@ -60,33 +61,25 @@ void	fill_stack(int ac, char **av, t_sstack *sa)
 		ft_sstkpush(sa, ft_atoi(av[ac]));
 }
 
-int		check_args(int ac, char **av)
-{
-	(void)av;
-	if (ac < 2)
-		return (0);
-	while (ac > 1)
-	{
-		ac--;
-	}
-	return (1);
-}
-
 int		main(int ac, char **av)
 {
 	t_sstack *sa;
 	t_sstack *sb;
 
-	if (!check_args(ac, av) || !(sa = ft_sstkinit(ac - 1)) || !(sb = ft_sstkinit(ac - 1)))
+	if (!check_args(ac, av) || !(sa = ft_sstkinit(ac - 1))
+			|| !(sb = ft_sstkinit(ac - 1)))
 		ft_putstr("Error\n");
 	else
 	{
 		fill_stack(ac, av, sa);
-		do_ops(sa, sb);
-		if (ft_sstkchkord(sa))
-			ft_putstr("OK\n");
-		else
-			ft_putstr("KO\n");
+		if (do_ops(sa, sb))
+		{
+			if (ft_sstkchkord(sa))
+				ft_putstr("OK\n");
+			else
+				ft_putstr("KO\n");
+		} else
+			ft_putstr("Error\n");
 	}
 	return (0);
 }

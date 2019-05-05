@@ -1,21 +1,33 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   push_swap.c                                        :+:      :+:    :+:   */
+/*   args_checker.c                                     :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: tpotier <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2019/05/02 16:58:02 by tpotier           #+#    #+#             */
-/*   Updated: 2019/05/05 16:16:26 by tpotier          ###   ########.fr       */
+/*   Created: 2019/05/05 16:09:07 by tpotier           #+#    #+#             */
+/*   Updated: 2019/05/05 16:10:47 by tpotier          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "push_swap.h"
 
-int		main(int ac, char **av)
+int		check_args(int ac, char **av)
 {
-	if (!check_args(ac, av))
+	int	i;
+
+	i = 0;
+	if (ac < 2)
 		return (0);
-	ft_putstr("ok\n");
-	return (0);
+	while (--ac >= 1)
+	{
+		i = 0;
+		while (av[ac][i])
+		{
+			if (!ft_isdigit(av[ac][i]) && av[ac][0] != '-')
+				return (0);
+			i++;
+		}
+	}
+	return (1);
 }
