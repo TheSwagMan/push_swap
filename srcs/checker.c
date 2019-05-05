@@ -6,11 +6,19 @@
 /*   By: tpotier <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/05/02 16:58:11 by tpotier           #+#    #+#             */
-/*   Updated: 2019/05/05 16:11:18 by tpotier          ###   ########.fr       */
+/*   Updated: 2019/05/05 17:28:57 by tpotier          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "push_swap.h"
+
+void	disp_stack(t_sstack *sa, t_sstack *sb)
+{
+	ft_putstr("Stack a:\n");
+	ft_sstkdisp(sa);
+	ft_putstr("Stack b:\n");
+	ft_sstkdisp(sb);
+}
 
 int		do_ops(t_sstack *sa, t_sstack *sb)
 {
@@ -42,17 +50,13 @@ int		do_ops(t_sstack *sa, t_sstack *sb)
 			ft_sstkrrot(sb);
 		else if (*buff)
 			return (0);
+		ft_putstr("Done ");
+		ft_putstr(buff);
+		ft_putendl(".");
+		disp_stack(sa, sb);
 		free(buff);
 	}
 	return (1);
-}
-
-void	disp_stack(t_sstack *sa, t_sstack *sb)
-{
-	ft_putstr("Stack a:\n");
-	ft_sstkdisp(sa);
-	ft_putstr("Stack b:\n");
-	ft_sstkdisp(sb);
 }
 
 void	fill_stack(int ac, char **av, t_sstack *sa)
