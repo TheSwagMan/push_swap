@@ -6,7 +6,7 @@
 /*   By: tpotier <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/05/02 16:59:06 by tpotier           #+#    #+#             */
-/*   Updated: 2019/05/06 03:40:49 by tpotier          ###   ########.fr       */
+/*   Updated: 2019/05/06 04:34:30 by tpotier          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 #ifndef PUSH_SWAP_H
@@ -18,7 +18,7 @@
 # define OPT_O	(1 << 3)
 # define OPT_G	(1 << 4)
 
-# define G_THK	30
+# define G_THK	50
 
 # define K_GBG	0x256E91l
 # define K_GFG	0xFFA237l

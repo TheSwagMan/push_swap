@@ -6,7 +6,7 @@
 /*   By: tpotier <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/05/02 16:58:02 by tpotier           #+#    #+#             */
-/*   Updated: 2019/05/06 01:51:43 by tpotier          ###   ########.fr       */
+/*   Updated: 2019/05/06 05:01:58 by tpotier          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,12 +33,10 @@ void	push_ops(t_dlist **ops, char *op)
 	if (*ops && ((ft_strequ(op, "ra") && ft_strequ((*ops)->content, "rra"))
 			|| (ft_strequ(op, "rra") && ft_strequ((*ops)->content, "ra"))
 			|| (ft_strequ(op, "rrb") && ft_strequ((*ops)->content, "rb"))
-			|| (ft_strequ(op, "rb") && ft_strequ((*ops)->content, "rrb"))))
-		ft_dlstdel(ops, NULL);
-	if (*ops && ((ft_strequ(op, "sa") && ft_strequ((*ops)->content, "sa"))
-			|| (ft_strequ(op, "sb") && ft_strequ((*ops)->content, "sb"))))
-		ft_dlstdel(ops, NULL);
-	if (*ops && ((ft_strequ(op, "pa") && ft_strequ((*ops)->content, "pb"))
+			|| (ft_strequ(op, "rb") && ft_strequ((*ops)->content, "rrb"))
+			|| (ft_strequ(op, "sa") && ft_strequ((*ops)->content, "sa"))
+			|| (ft_strequ(op, "sb") && ft_strequ((*ops)->content, "sb"))
+			|| (ft_strequ(op, "pa") && ft_strequ((*ops)->content, "pb"))
 			|| (ft_strequ(op, "pb") && ft_strequ((*ops)->content, "pa"))))
 		ft_dlstdel(ops, NULL);
 	else
@@ -117,7 +115,6 @@ int		sort2(t_dlist **ops, int *vals, int size)
 {
 	t_sstack	*sa;
 	t_sstack	*sb;
-	int			t;
 
 	sa = NULL;
 	sb = NULL;
@@ -125,18 +122,15 @@ int		sort2(t_dlist **ops, int *vals, int size)
 		return (0);
 	while (sa->sp)
 	{
-		t = sa->stack[sa->sp - 1];
-		while (sb->sp && sb->stack[sb->sp - 1] >= t)
+		if (sa->sp > 1 && sa->stack[sa->sp - 1] > sa->stack[0])
+			do_rop(ops, "ra", sa, sb);
+		do_rop(ops, "pb", sa, sb);
+		while (sb->sp && sb->stack[sb->sp - 1] > sa->stack[sa->sp - 1])
 		{
 			do_rop(ops, "pa", sa, sb);
 			do_rop(ops, "sa", sa, sb);
 		}
-		while (sa->sp && sa->stack[sa->sp - 1] >= t)
-		{
-			if (sa->stack[sa->sp - 1] < sa->stack[sa->sp - 1])
-				do_rop(ops, "sa", sa, sb);
-			do_rop(ops, "pb", sa, sb);
-		}
+		do_rop(ops, "pb", sa, sb);
 	}
 	while (sb->sp)
 		do_rop(ops, "pa", sa, sb);
