@@ -6,84 +6,47 @@
 /*   By: tpotier <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/05/02 16:58:11 by tpotier           #+#    #+#             */
-/*   Updated: 2019/05/05 17:28:57 by tpotier          ###   ########.fr       */
+/*   Updated: 2019/05/06 01:18:40 by tpotier          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "push_swap.h"
 
-void	disp_stack(t_sstack *sa, t_sstack *sb)
-{
-	ft_putstr("Stack a:\n");
-	ft_sstkdisp(sa);
-	ft_putstr("Stack b:\n");
-	ft_sstkdisp(sb);
-}
-
-int		do_ops(t_sstack *sa, t_sstack *sb)
+int		do_ops(t_sstack *sa, t_sstack *sb, int opts)
 {
 	char	*buff;
 
+	if (opts & OPT_C)
+		disp_stack(sa, sb, NULL, opts);
 	while (ft_getnextline(0, &buff) > 0)
 	{
-		if (ft_strequ("sa", buff) || ft_strequ("ss", buff))
-			ft_sstkswap(sa);
-		else if (ft_strequ("sb", buff) || ft_strequ("ss", buff))
-			ft_sstkswap(sb);
-		else if (ft_strequ("pa", buff))
-		{
-			if (sb->sp)
-				ft_sstkpush(sa, ft_sstkpop(sb));
-		}
-		else if (ft_strequ("pb", buff))
-		{
-			if (sa->sp)
-				ft_sstkpush(sb, ft_sstkpop(sa));
-		}
-		else if (ft_strequ("ra", buff) || ft_strequ("rr", buff))
-			ft_sstkrot(sa);
-		else if (ft_strequ("rb", buff) || ft_strequ("rr", buff))
-			ft_sstkrot(sb);
-		else if (ft_strequ("rra", buff) || ft_strequ("rrr", buff))
-			ft_sstkrrot(sa);
-		else if (ft_strequ("rrb", buff) || ft_strequ("rrr", buff))
-			ft_sstkrrot(sb);
-		else if (*buff)
+		if (!do_op(buff, sa, sb))
 			return (0);
-		ft_putstr("Done ");
-		ft_putstr(buff);
-		ft_putendl(".");
-		disp_stack(sa, sb);
+		if (opts & OPT_C)
+			disp_stack(sa, sb, buff, opts);
 		free(buff);
 	}
 	return (1);
 }
 
-void	fill_stack(int ac, char **av, t_sstack *sa)
-{
-	while (--ac > 0)
-		ft_sstkpush(sa, ft_atoi(av[ac]));
-}
-
 int		main(int ac, char **av)
 {
-	t_sstack *sa;
-	t_sstack *sb;
+	t_sstack	*sa;
+	t_sstack	*sb;
+	int			opts;
+	int			*vals;
+	int			size;
 
-	if (!check_args(ac, av) || !(sa = ft_sstkinit(ac - 1))
-			|| !(sb = ft_sstkinit(ac - 1)))
-		ft_putstr("Error\n");
-	else
+	sa = NULL;
+	sb = NULL;
+	if ((vals = parse_args(ac, av, &size, &opts))
+			&& fill_stack(vals, size, &sa, &sb) && do_ops(sa, sb, opts))
 	{
-		fill_stack(ac, av, sa);
-		if (do_ops(sa, sb))
-		{
-			if (ft_sstkchkord(sa))
-				ft_putstr("OK\n");
-			else
-				ft_putstr("KO\n");
-		} else
-			ft_putstr("Error\n");
-	}
+		if (ft_sstkchkord(sa))
+			ft_putstr("OK\n");
+		else
+			ft_putstr("KO\n");
+	} else
+		ft_putstr("Error\n");
 	return (0);
 }

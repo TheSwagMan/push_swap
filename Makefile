@@ -6,13 +6,13 @@
 #    By: tpotier <marvin@42.fr>                     +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2019/04/01 16:36:41 by tpotier           #+#    #+#              #
-#    Updated: 2019/05/05 16:15:59 by tpotier          ###   ########.fr        #
+#    Updated: 2019/05/06 03:34:16 by tpotier          ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
 CC = gcc
-FILES1 = checker args_checker
-FILES2 = push_swap args_checker
+FILES1 = checker args_checker stack_utils display
+FILES2 = push_swap args_checker stack_utils
 IFILES = push_swap.h
 NAME1 = checker
 NAME2 = push_swap
@@ -58,4 +58,4 @@ fclean: clean
 re: fclean all
 
 .PHONY: all clean fclean re
--include $(DEPS)
+-include $(DEPS1) $(DEPS2)
