@@ -6,12 +6,11 @@
 /*   By: tpotier <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/05/02 16:58:02 by tpotier           #+#    #+#             */
-/*   Updated: 2019/05/06 05:01:58 by tpotier          ###   ########.fr       */
+/*   Updated: 2019/05/07 20:17:54 by tpotier          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "push_swap.h"
-#include <stdio.h>
 
 void	disp_ops(t_dlist *ops)
 {
@@ -39,8 +38,39 @@ void	push_ops(t_dlist **ops, char *op)
 			|| (ft_strequ(op, "pa") && ft_strequ((*ops)->content, "pb"))
 			|| (ft_strequ(op, "pb") && ft_strequ((*ops)->content, "pa"))))
 		ft_dlstdel(ops, NULL);
+	else if (*ops && ((ft_strequ(op, "sa") && ft_strequ((*ops)->content, "sb"))
+			|| (ft_strequ(op, "sb") && ft_strequ((*ops)->content, "sa"))))
+	{
+		ft_dlstdel(ops, NULL);
+		ft_dlstadd_end(ops, "ss");
+	}
+	else if (*ops && ((ft_strequ(op, "ra") && ft_strequ((*ops)->content, "rb"))
+			|| (ft_strequ(op, "rb") && ft_strequ((*ops)->content, "ra"))))
+	{
+		ft_dlstdel(ops, NULL);
+		ft_dlstadd_end(ops, "rr");
+	}
+	else if (*ops && ((ft_strequ(op, "rra") && ft_strequ((*ops)->content, "rrb"))
+			|| (ft_strequ(op, "rrb") && ft_strequ((*ops)->content, "rra"))))
+	{
+		ft_dlstdel(ops, NULL);
+		ft_dlstadd_end(ops, "rrr");
+	}
 	else
 		ft_dlstadd_end(ops, op);
+}
+
+void	disp_tab(int *t, int n)
+{
+	int	i;
+
+	i = 0;
+	ft_putendl("Array:");
+	while (i < n)
+	{
+		ft_putnbr(t[i++]);
+		ft_putstr("\n");
+	}
 }
 
 void	optimize_ops(t_dlist *ops, int size)
@@ -111,43 +141,55 @@ int		do_rop(t_dlist **ops, char *op, t_sstack *sa, t_sstack *sb)
 	return (1);
 }
 
+int		get_median(int *vals, int size)
+{
+	int	min;
+	int	i;
+	int	sorted;
+
+	min = 0;
+	sorted = 0;
+	while (!sorted)
+	{
+		i = 0;
+		sorted = 1;
+		while (i < size - 1)
+		{
+			if (vals[i] > vals[i + 1])
+			{
+				ft_swap(&(vals[i]), &(vals[i + 1]), sizeof(*vals));
+				sorted = 0;
+			}
+			i++;
+		}
+	}
+	return (vals[size / 2 - (size % 2 ? 0 : 1)]);
+}
+
 int		sort2(t_dlist **ops, int *vals, int size)
 {
 	t_sstack	*sa;
 	t_sstack	*sb;
+	int			med;
+	int			i;
 
 	sa = NULL;
 	sb = NULL;
 	if (!fill_stack(vals, size, &sa, &sb))
 		return (0);
-	while (sa->sp)
-	{
-		if (sa->sp > 1 && sa->stack[sa->sp - 1] > sa->stack[0])
+	med = get_median(vals, size);
+	//disp_tab(vals, size);
+	//ft_printf("Med: %d\n", med);
+	while (sb->sp < sa->sp)
+		if (sa->stack[sa->sp - 1] <= med)
+			do_rop(ops, "pb", sa, sb);
+		else
 			do_rop(ops, "ra", sa, sb);
-		do_rop(ops, "pb", sa, sb);
-		while (sb->sp && sb->stack[sb->sp - 1] > sa->stack[sa->sp - 1])
-		{
-			do_rop(ops, "pa", sa, sb);
-			do_rop(ops, "sa", sa, sb);
-		}
-		do_rop(ops, "pb", sa, sb);
-	}
-	while (sb->sp)
-		do_rop(ops, "pa", sa, sb);
-	return (1);
-}
-
-void	disp_tab(int *t, int n)
-{
-	int	i;
-
-	i = 0;
-	ft_putendl("Array:");
-	while (i < n)
+	while (!ft_sstkchksrt(sa))
 	{
-		ft_putnbr(t[i++]);
-		ft_putstr("\n");
+
 	}
+	return (1);
 }
 
 void	quicksort_rec(t_dlist **ops, int *array, int low, int high)
@@ -229,7 +271,7 @@ int		main(int ac, char **av)
 		//disp_tab(tab, size);
 		//quicksort(&ops, tab, size);
 		//disp_tab(tab, size);
-		//sort(&ops, tab, size);
+		//sort(&ops, vals, size);
 		sort2(&ops, vals, size);
 		disp_ops(ops);
 	}
