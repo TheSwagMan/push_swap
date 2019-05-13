@@ -6,7 +6,7 @@
 /*   By: tpotier <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/05/02 16:58:02 by tpotier           #+#    #+#             */
-/*   Updated: 2019/05/07 20:17:54 by tpotier          ###   ########.fr       */
+/*   Updated: 2019/05/13 19:24:44 by tpotier          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -170,25 +170,22 @@ int		sort2(t_dlist **ops, int *vals, int size)
 {
 	t_sstack	*sa;
 	t_sstack	*sb;
-	int			med;
-	int			i;
 
 	sa = NULL;
 	sb = NULL;
 	if (!fill_stack(vals, size, &sa, &sb))
 		return (0);
-	med = get_median(vals, size);
-	//disp_tab(vals, size);
-	//ft_printf("Med: %d\n", med);
-	while (sb->sp < sa->sp)
-		if (sa->stack[sa->sp - 1] <= med)
-			do_rop(ops, "pb", sa, sb);
-		else
-			do_rop(ops, "ra", sa, sb);
-	while (!ft_sstkchksrt(sa))
+	while (sa->sp > 1)
 	{
-
+		if (sa->stack[sa->sp - 1] > sa->stack[sa->sp - 2])
+			do_rop(ops, "sa", sa, sb);
+		if (sa->sp > 2)
+		{
+			do_rop(ops, "pb", sa, sb);
+			do_rop(ops, "pb", sa, sb);
+		}
 	}
+	
 	return (1);
 }
 
