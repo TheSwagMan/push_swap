@@ -6,7 +6,7 @@
 /*   By: tpotier <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/05/02 16:58:02 by tpotier           #+#    #+#             */
-/*   Updated: 2019/05/13 19:24:44 by tpotier          ###   ########.fr       */
+/*   Updated: 2019/05/13 21:16:51 by tpotier          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,6 +29,7 @@ void	push_ops(t_dlist **ops, char *op)
 		*ops = (*ops)->next;
 	//ft_putstr("Action:");
 	//ft_putendl(op);
+#if 0
 	if (*ops && ((ft_strequ(op, "ra") && ft_strequ((*ops)->content, "rra"))
 			|| (ft_strequ(op, "rra") && ft_strequ((*ops)->content, "ra"))
 			|| (ft_strequ(op, "rrb") && ft_strequ((*ops)->content, "rb"))
@@ -57,6 +58,7 @@ void	push_ops(t_dlist **ops, char *op)
 		ft_dlstadd_end(ops, "rrr");
 	}
 	else
+#endif
 		ft_dlstadd_end(ops, op);
 }
 
@@ -166,10 +168,21 @@ int		get_median(int *vals, int size)
 	return (vals[size / 2 - (size % 2 ? 0 : 1)]);
 }
 
+size_t		get_loc(t_sstack *sa, int n)
+{
+	size_t	i;
+
+	i = 0;
+	while (i < sa->sp && sa->stack[i] > n)
+		i++;
+	return (i);
+}
+
 int		sort2(t_dlist **ops, int *vals, int size)
 {
 	t_sstack	*sa;
 	t_sstack	*sb;
+	size_t		n;
 
 	sa = NULL;
 	sb = NULL;
@@ -177,15 +190,30 @@ int		sort2(t_dlist **ops, int *vals, int size)
 		return (0);
 	while (sa->sp > 1)
 	{
-		if (sa->stack[sa->sp - 1] > sa->stack[sa->sp - 2])
+		do_rop(ops, "pb", sa, sb);
+		do_rop(ops, "pb", sa, sb);
+		if (sa->sp > 1 && sa->stack[sa->sp - 1] > sa->stack[sa->sp - 2])
 			do_rop(ops, "sa", sa, sb);
-		if (sa->sp > 2)
+		if (sb->sp > 1 && sb->stack[sb->sp - 1] < sb->stack[sb->sp - 2])
+			do_rop(ops, "sb", sa, sb);
+		if (sa->sp > 1)
 		{
 			do_rop(ops, "pb", sa, sb);
 			do_rop(ops, "pb", sa, sb);
 		}
 	}
-	
+	/*return (1);*/
+	while (sb->sp)
+	{
+		n = get_loc(sa, sb->stack[sb->sp - 1]);
+		while (n--)
+			do_rop(ops, "rra", sa, sb);
+		do_rop(ops, "pa", sa, sb);
+		while (sa->sp > 1 && sa->stack[sa->sp - 1] >= sa->stack[0])
+			do_rop(ops, "ra", sa, sb);
+	}
+	while (sa->stack[0] <= sa->stack[sa->sp - 1])
+		do_rop(ops, "ra", sa, sb);
 	return (1);
 }
 
