@@ -6,7 +6,7 @@
 /*   By: tpotier <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/05/02 16:58:02 by tpotier           #+#    #+#             */
-/*   Updated: 2019/05/13 21:16:51 by tpotier          ###   ########.fr       */
+/*   Updated: 2019/05/17 17:38:12 by tpotier          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -143,12 +143,16 @@ int		do_rop(t_dlist **ops, char *op, t_sstack *sa, t_sstack *sb)
 	return (1);
 }
 
-int		get_median(int *vals, int size)
+int		get_median(int *vals, size_t size)
 {
-	int	min;
-	int	i;
-	int	sorted;
+	int		*new;
+	int		min;
+	size_t	i;
+	int		sorted;
 
+	if (!(new = (int *)malloc(size * sizeof(int))))
+		return (0);
+	ft_memcpy(new, vals, size * sizeof(int));
 	min = 0;
 	sorted = 0;
 	while (!sorted)
@@ -157,15 +161,17 @@ int		get_median(int *vals, int size)
 		sorted = 1;
 		while (i < size - 1)
 		{
-			if (vals[i] > vals[i + 1])
+			if (new[i] > new[i + 1])
 			{
-				ft_swap(&(vals[i]), &(vals[i + 1]), sizeof(*vals));
+				ft_swap(&(new[i]), &(new[i + 1]), sizeof(*new));
 				sorted = 0;
 			}
 			i++;
 		}
 	}
-	return (vals[size / 2 - (size % 2 ? 0 : 1)]);
+	min = new[size / 2 - (size % 2 ? 0 : 1)];
+	free(new);
+	return (min);
 }
 
 size_t		get_loc(t_sstack *sa, int n)
@@ -178,20 +184,110 @@ size_t		get_loc(t_sstack *sa, int n)
 	return (i);
 }
 
+void	sort_3(t_dlist **ops, int *vals, int size)
+{
+	t_sstack	*sa;
+	t_sstack	*sb;
+	int			med;
+	size_t		old_sz;
+
+	sa = NULL;
+	sb = NULL;
+	if (!fill_stack(vals, size, &sa, &sb))
+		return ;
+	while (sa->sp > 3)
+	{
+		med = get_median(sa->stack, sa->sp);
+		old_sz = sa->sp;
+		ft_putendl_fd("ok", 2);
+		while (sa->sp > old_sz / 2)
+		{
+			ft_putnbr_fd(sa->sp, 2);
+			ft_putstr_fd(" - ", 2);
+			ft_putnbr_fd(old_sz / 2, 2);
+			ft_putstr_fd(" - ", 2);
+			ft_putnbr_fd(med, 2);
+			ft_putchar_fd('\n', 2);
+			if (sa->stack[sa->sp - 1] <= med)
+				do_rop(ops, "pb", sa, sb);
+			else
+				do_rop(ops, "ra", sa, sb);
+		}
+	}
+
+}
+
 int		sort2(t_dlist **ops, int *vals, int size)
 {
 	t_sstack	*sa;
 	t_sstack	*sb;
 	size_t		n;
+	size_t		i;
+	size_t		k;
 
 	sa = NULL;
 	sb = NULL;
 	if (!fill_stack(vals, size, &sa, &sb))
 		return (0);
-	while (sa->sp > 1)
+	i = 1;
+	while (i * i < sa->size)
+	{
+		if (i % 2)
+		{
+			n = 0;
+			while (sa->sp > i * i)
+			{
+				k = 0;
+				while (k++ < i)
+					do_rop(ops, "pb", sa, sb);
+				while (k--)
+				{
+					if (sb->stack[sb->sp - 1] > sa->stack[sa->sp - 1] && n % 2)
+				{
+						do_rop(ops, "pb", sa, sb);
+						do_rop(ops, "rb", sa, sb);
+					}
+					else
+					{
+						do_rop(ops, "rb", sa, sb);
+						do_rop(ops, "pb", sa, sb);
+					}
+					do_rop(ops, "rb", sa, sb);
+				}
+				n++;
+			}
+		}
+		else
+		{
+			while (sb->sp > i * i)
+			{
+				k = 0;
+				while (k++ < i)
+					do_rop(ops, "pa", sa, sb);
+				while (k--)
+				{
+					if (sb->stack[sb->sp - 1] > sa->stack[sa->sp - 1])
+					{
+						do_rop(ops, "pa", sa, sb);
+						do_rop(ops, "ra", sa, sb);
+					}
+					else
+					{
+						do_rop(ops, "ra", sa, sb);
+						do_rop(ops, "pa", sa, sb);
+					}
+				}
+			}
+		}
+		if (i == 2)
+			return (1);
+		i++;
+	}
+	while (sa->sp)
 	{
 		do_rop(ops, "pb", sa, sb);
-		do_rop(ops, "pb", sa, sb);
+		if (sa->sp)
+			do_rop(ops, "pb", sa, sb);
 		if (sa->sp > 1 && sa->stack[sa->sp - 1] > sa->stack[sa->sp - 2])
 			do_rop(ops, "sa", sa, sb);
 		if (sb->sp > 1 && sb->stack[sb->sp - 1] < sb->stack[sb->sp - 2])
@@ -202,7 +298,24 @@ int		sort2(t_dlist **ops, int *vals, int size)
 			do_rop(ops, "pb", sa, sb);
 		}
 	}
-	/*return (1);*/
+	while (sb->sp)
+	{
+		do_rop(ops, "pa", sa, sb);
+		if (sb->sp > 1 && sb->stack[sb->sp - 1] < sb->stack[sb->sp - 2])
+			do_rop(ops, "sb", sa, sb);
+		do_rop(ops, "pa", sa, sb);
+		if (sa->sp > 1 && sa->stack[sa->sp - 1] > sa->stack[sa->sp - 2])
+			do_rop(ops, "sa", sa, sb);
+		if (sb->sp > 1 && sb->stack[sb->sp - 1] < sb->stack[sb->sp - 2])
+			do_rop(ops, "sb", sa, sb);
+		if (sb->sp)
+			do_rop(ops, "pa", sa, sb);
+		if (sa->sp > 1 && sa->stack[sa->sp - 1] > sa->stack[sa->sp - 2])
+			do_rop(ops, "sa", sa, sb);
+		if (sb->sp)
+			do_rop(ops, "pa", sa, sb);
+	}
+	return (0);
 	while (sb->sp)
 	{
 		n = get_loc(sa, sb->stack[sb->sp - 1]);
@@ -297,7 +410,7 @@ int		main(int ac, char **av)
 		//quicksort(&ops, tab, size);
 		//disp_tab(tab, size);
 		//sort(&ops, vals, size);
-		sort2(&ops, vals, size);
+		sort_3(&ops, vals, size);
 		disp_ops(ops);
 	}
 	return (0);
