@@ -6,48 +6,38 @@
 /*   By: tpotier <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/05/05 21:48:44 by tpotier           #+#    #+#             */
-/*   Updated: 2019/05/06 02:54:05 by tpotier          ###   ########.fr       */
+/*   Updated: 2019/05/21 07:31:24 by tpotier          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "push_swap.h"
 
-int		do_op(char *buff, t_sstack *sa, t_sstack *sb)
+int		do_op(t_ps_bench *bench, char *buff)
 {
 	if (ft_strequ("sa", buff) || ft_strequ("ss", buff))
-		ft_sstkswap(sa);
+		ft_sstkswap(bench->sa);
 	else if (ft_strequ("sb", buff) || ft_strequ("ss", buff))
-		ft_sstkswap(sb);
+		ft_sstkswap(bench->sb);
 	else if (ft_strequ("pa", buff))
 	{
-		if (sb->sp)
-			ft_sstkpush(sa, ft_sstkpop(sb));
+		if (bench->sb->sp)
+			ft_sstkpush(bench->sa, ft_sstkpop(bench->sb));
 	}
 	else if (ft_strequ("pb", buff))
 	{
-		if (sa->sp)
-			ft_sstkpush(sb, ft_sstkpop(sa));
+		if (bench->sa->sp)
+			ft_sstkpush(bench->sb, ft_sstkpop(bench->sa));
 	}
 	else if (ft_strequ("ra", buff) || ft_strequ("rr", buff))
-		ft_sstkrot(sa);
+		ft_sstkrot(bench->sa);
 	else if (ft_strequ("rb", buff) || ft_strequ("rr", buff))
-		ft_sstkrot(sb);
+		ft_sstkrot(bench->sb);
 	else if (ft_strequ("rra", buff) || ft_strequ("rrr", buff))
-		ft_sstkrrot(sa);
+		ft_sstkrrot(bench->sa);
 	else if (ft_strequ("rrb", buff) || ft_strequ("rrr", buff))
-		ft_sstkrrot(sb);
+		ft_sstkrrot(bench->sb);
 	else if (*buff)
 		return (0);
-	return (1);
-}
-
-int		fill_stack(int *vals, int size, t_sstack **sa, t_sstack **sb)
-{
-	if (!(*sa = ft_sstkinit(size)) || !(*sb = ft_sstkinit(size)))
-		return (0);
-	while (size-- > 0)
-		ft_sstkpush(*sa, vals[size]);
-	free(vals);
 	return (1);
 }
 

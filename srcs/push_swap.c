@@ -6,7 +6,7 @@
 /*   By: tpotier <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/05/02 16:58:02 by tpotier           #+#    #+#             */
-/*   Updated: 2019/05/17 17:38:12 by tpotier          ###   ########.fr       */
+/*   Updated: 2019/05/21 07:41:17 by tpotier          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,10 +23,10 @@ void	disp_ops(t_dlist *ops)
 	}
 }
 
-void	push_ops(t_dlist **ops, char *op)
+void	push_ops(t_ps_bench *bench, char *op)
 {
-	while (*ops && (*ops)->next)
-		*ops = (*ops)->next;
+	while (bench->ops && bench->ops->next)
+		bench->ops = bench->ops->next;
 	//ft_putstr("Action:");
 	//ft_putendl(op);
 #if 0
@@ -59,7 +59,7 @@ void	push_ops(t_dlist **ops, char *op)
 	}
 	else
 #endif
-		ft_dlstadd_end(ops, op);
+		ft_dlstadd_end(&(bench->ops), op);
 }
 
 void	disp_tab(int *t, int n)
@@ -109,6 +109,7 @@ void	optimize_ops(t_dlist *ops, int size)
 	}
 }
 
+/*
 void	sort(t_dlist **ops, int *lst, int n)
 {
 	int	min;
@@ -134,12 +135,13 @@ void	sort(t_dlist **ops, int *lst, int n)
 	while (i-- > 0)
 		push_ops(ops, "rra");
 }
+*/
 
-int		do_rop(t_dlist **ops, char *op, t_sstack *sa, t_sstack *sb)
+int		do_rop(t_ps_bench *bench, char *op)
 {
-	if (!do_op(op, sa, sb))
+	if (!do_op(bench, op))
 		return (0);
-	push_ops(ops, op);
+	push_ops(bench, op);
 	return (1);
 }
 
@@ -184,37 +186,76 @@ size_t		get_loc(t_sstack *sa, int n)
 	return (i);
 }
 
-void	sort_3(t_dlist **ops, int *vals, int size)
+int		quickpart_stk(t_ps_bench *bench)
 {
-	t_sstack	*sa;
-	t_sstack	*sb;
+	int		piv;
+	size_t	old_sz;
+
+	if (bench->sa->sp > 2)
+	{
+		piv = get_median(bench->sa->stack, bench->sa->sp);
+		old_sz = bench->sa->sp;
+		while (bench->sa->sp > old_sz / 2)
+		{
+			if (bench->sa->stack[bench->sa->sp - 1] <= piv)
+				do_rop(bench, "pb");
+			else
+				do_rop(bench, "ra");
+		}
+		return (old_sz / 2);
+	}
+	return (2);
+}
+
+void	quicksort_stk(t_ps_bench *bench)
+{
+	(void)bench;
+}
+
+
+void	quicksort_stk_wrp(t_ps_bench *bench)
+{
+	quicksort_stk(bench);
+}
+
+/*
+void	split_and_sort(t_dlist **ops, t_sstack *sa, t_sstack *sb)
+{
 	int			med;
 	size_t		old_sz;
+	size_t		count;
 
-	sa = NULL;
-	sb = NULL;
-	if (!fill_stack(vals, size, &sa, &sb))
-		return ;
-	while (sa->sp > 3)
+	count = 0;
+	if (sa->sp > 2)
 	{
 		med = get_median(sa->stack, sa->sp);
 		old_sz = sa->sp;
-		ft_putendl_fd("ok", 2);
+		count = sa->sp - old_sz / 2;
 		while (sa->sp > old_sz / 2)
 		{
-			ft_putnbr_fd(sa->sp, 2);
-			ft_putstr_fd(" - ", 2);
-			ft_putnbr_fd(old_sz / 2, 2);
-			ft_putstr_fd(" - ", 2);
-			ft_putnbr_fd(med, 2);
-			ft_putchar_fd('\n', 2);
 			if (sa->stack[sa->sp - 1] <= med)
 				do_rop(ops, "pb", sa, sb);
 			else
 				do_rop(ops, "ra", sa, sb);
 		}
+		split_and_sort(ops, sa, sb);
 	}
+	if (sa->stack[sa->sp - 1] > sa->stack[sa->sp - 2])
+		do_rop(ops, "sa", sa, sb);
+	while (count--)
+		do_rop(ops, "pa", sa, sb);
+}
 
+void	sort_3(t_dlist **ops, int *vals, int size)
+{
+	t_sstack	*sa;
+	t_sstack	*sb;
+
+	sa = NULL;
+	sb = NULL;
+	if (!fill_stack(vals, size, &sa, &sb))
+		return ;
+	split_and_sort(ops, sa, sb);
 }
 
 int		sort2(t_dlist **ops, int *vals, int size)
@@ -394,24 +435,25 @@ void	quicksort(t_dlist **ops, int *array, int size)
 {
 	quicksort_rec(ops, array, 0, size - 1);
 }
-
+*/
 
 int		main(int ac, char **av)
 {
-	int		*vals;
-	int		size;
-	int		opts;
-	t_dlist	*ops;
+	int			*vals;
+	int			size;
+	int			opts;
+	t_ps_bench	bench;
 
-	ops = NULL;
-	if ((vals = parse_args(ac, av, &size, &opts)))
+	if ((vals = parse_args(ac, av, &size, &opts))
+			|| !init_bench(vals, size, &bench))
 	{
 		//disp_tab(tab, size);
 		//quicksort(&ops, tab, size);
 		//disp_tab(tab, size);
 		//sort(&ops, vals, size);
-		sort_3(&ops, vals, size);
-		disp_ops(ops);
+		//sort_3(&ops, vals, size);
+		quicksort_stk_wrp(&bench);
+		disp_ops(bench.ops);
 	}
 	return (0);
 }
