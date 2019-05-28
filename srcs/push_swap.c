@@ -6,7 +6,7 @@
 /*   By: tpotier <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/05/02 16:58:02 by tpotier           #+#    #+#             */
-/*   Updated: 2019/05/28 21:06:31 by tpotier          ###   ########.fr       */
+/*   Updated: 2019/05/28 22:55:19 by tpotier          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -161,8 +161,10 @@ void	smart_rotate_b(t_ps_bench *ben, size_t k)
 
 	n = 0;
 	if (k > ben->sb->sp / 2)
+	{
 		while (n++ < ben->sb->sp - k)
 			do_rop(ben, "rrb");
+	}
 	else
 		while (n++ < k)
 			do_rop(ben, "rb");
@@ -173,8 +175,8 @@ void	_insertion_sort(t_ps_bench *ben)
 	size_t	i;
 	int		min;
 	int		max;
+	int		omin;
 
-	i = 0;
 	min = ben->sa->stack[ben->sa->sp - 1];
 	max = min;
 	do_rop(ben, "pb");
@@ -183,12 +185,21 @@ void	_insertion_sort(t_ps_bench *ben)
 		if (ben->sa->stack[ben->sa->sp - 1] > max \
 				|| ben->sa->stack[ben->sa->sp - 1] < min)
 		{
-			while (ben->sb->stack[ben->sb->sp - 1] < ben->sb->stack[0])
-				do_rop(ben, "rb");
+			/*while (ben->sb->stack[ben->sb->sp - 1] < ben->sb->stack[0])*/
+				/*do_rop(ben, "rb");*/
+			if (ben->sb->sp > 1)
+			{
+				i = 0;
+				while (i < ben->sb->sp - 2 && ben->sb->stack[i] < ben->sb->stack[i + 1])
+					i++;
+				if (i)
+					smart_rotate_b(ben, ben->sb->sp - i - 1);
+			}
+			omin = min;
 			min = ft_min(ben->sa->stack[ben->sa->sp - 1], min);
 			max = ft_max(ben->sa->stack[ben->sa->sp - 1], max);
 			do_rop(ben, "pb");
-			if (ben->sa->stack[ben->sa->sp - 1] < min)
+			if (ben->sa->stack[ben->sa->sp - 1] < omin)
 				do_rop(ben, "rb");
 		}
 		else
@@ -202,9 +213,10 @@ void	_insertion_sort(t_ps_bench *ben)
 			do_rop(ben, "pb");
 		}
 	}
-	smart_rotate_b(ben, 0);
-	while (ben->sb->stack[ben->sb->sp - 1] < ben->sb->stack[0])
-		do_rop(ben, "rb");
+	i = 0;
+	while (i < ben->sb->sp - 2 && ben->sb->stack[i] < ben->sb->stack[i + 1])
+		i++;
+	smart_rotate_b(ben, ben->sb->sp - i - 1);
 	while (ben->sb->sp)
 		do_rop(ben, "pa");
 }
