@@ -1,5 +1,5 @@
 *.o
 *.d
-checker
+*checker
 push_swap
 .DS_Store
