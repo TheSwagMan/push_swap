@@ -6,7 +6,7 @@
 /*   By: tpotier <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/05/02 16:58:02 by tpotier           #+#    #+#             */
-/*   Updated: 2019/05/21 07:41:17 by tpotier          ###   ########.fr       */
+/*   Updated: 2019/05/28 21:06:31 by tpotier          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,37 +29,184 @@ void	push_ops(t_ps_bench *bench, char *op)
 		bench->ops = bench->ops->next;
 	//ft_putstr("Action:");
 	//ft_putendl(op);
-#if 0
-	if (*ops && ((ft_strequ(op, "ra") && ft_strequ((*ops)->content, "rra"))
-			|| (ft_strequ(op, "rra") && ft_strequ((*ops)->content, "ra"))
-			|| (ft_strequ(op, "rrb") && ft_strequ((*ops)->content, "rb"))
-			|| (ft_strequ(op, "rb") && ft_strequ((*ops)->content, "rrb"))
-			|| (ft_strequ(op, "sa") && ft_strequ((*ops)->content, "sa"))
-			|| (ft_strequ(op, "sb") && ft_strequ((*ops)->content, "sb"))
-			|| (ft_strequ(op, "pa") && ft_strequ((*ops)->content, "pb"))
-			|| (ft_strequ(op, "pb") && ft_strequ((*ops)->content, "pa"))))
-		ft_dlstdel(ops, NULL);
-	else if (*ops && ((ft_strequ(op, "sa") && ft_strequ((*ops)->content, "sb"))
-			|| (ft_strequ(op, "sb") && ft_strequ((*ops)->content, "sa"))))
+#if 1
+	if (bench->ops && ((ft_strequ(op, "ra") && ft_strequ(bench->ops->content, "rra"))
+			|| (ft_strequ(op, "rra") && ft_strequ(bench->ops->content, "ra"))
+			|| (ft_strequ(op, "rrb") && ft_strequ(bench->ops->content, "rb"))
+			|| (ft_strequ(op, "rb") && ft_strequ(bench->ops->content, "rrb"))
+			|| (ft_strequ(op, "sa") && ft_strequ(bench->ops->content, "sa"))
+			|| (ft_strequ(op, "sb") && ft_strequ(bench->ops->content, "sb"))
+			|| (ft_strequ(op, "pa") && ft_strequ(bench->ops->content, "pb"))
+			|| (ft_strequ(op, "pb") && ft_strequ(bench->ops->content, "pa"))))
+		ft_dlstdel(&(bench->ops), NULL);
+	else if (bench->ops && ((ft_strequ(op, "sa") && ft_strequ(bench->ops->content, "sb"))
+			|| (ft_strequ(op, "sb") && ft_strequ(bench->ops->content, "sa"))))
 	{
-		ft_dlstdel(ops, NULL);
-		ft_dlstadd_end(ops, "ss");
+		ft_dlstdel(&(bench->ops), NULL);
+		ft_dlstadd_end(&(bench->ops), "ss");
 	}
-	else if (*ops && ((ft_strequ(op, "ra") && ft_strequ((*ops)->content, "rb"))
-			|| (ft_strequ(op, "rb") && ft_strequ((*ops)->content, "ra"))))
+	else if (bench->ops && ((ft_strequ(op, "ra") && ft_strequ(bench->ops->content, "rb"))
+			|| (ft_strequ(op, "rb") && ft_strequ(bench->ops->content, "ra"))))
 	{
-		ft_dlstdel(ops, NULL);
-		ft_dlstadd_end(ops, "rr");
+		ft_dlstdel(&(bench->ops), NULL);
+		ft_dlstadd_end(&(bench->ops), "rr");
 	}
-	else if (*ops && ((ft_strequ(op, "rra") && ft_strequ((*ops)->content, "rrb"))
-			|| (ft_strequ(op, "rrb") && ft_strequ((*ops)->content, "rra"))))
+	else if (bench->ops && ((ft_strequ(op, "rra") && ft_strequ(bench->ops->content, "rrb"))
+			|| (ft_strequ(op, "rrb") && ft_strequ(bench->ops->content, "rra"))))
 	{
-		ft_dlstdel(ops, NULL);
-		ft_dlstadd_end(ops, "rrr");
+		ft_dlstdel(&(bench->ops), NULL);
+		ft_dlstadd_end(&(bench->ops), "rrr");
 	}
 	else
 #endif
 		ft_dlstadd_end(&(bench->ops), op);
+}
+
+int		do_rop(t_ps_bench *bench, char *op)
+{
+	if (!do_op(bench, op))
+		return (0);
+	push_ops(bench, op);
+	return (1);
+}
+
+int		get_median(int *vals, size_t size)
+{
+	int		*new;
+	int		min;
+	size_t	i;
+	int		sorted;
+
+	if (!(new = (int *)malloc(size * sizeof(int))))
+		return (0);
+	ft_memcpy(new, vals, size * sizeof(int));
+	min = 0;
+	sorted = 0;
+	while (!sorted)
+	{
+		i = 0;
+		sorted = 1;
+		while (i < size - 1)
+		{
+			if (new[i] > new[i + 1])
+			{
+				ft_swap(&(new[i]), &(new[i + 1]), sizeof(*new));
+				sorted = 0;
+			}
+			i++;
+		}
+	}
+	min = new[size / 2 - (size % 2 ? 0 : 1)];
+	free(new);
+	return (min);
+}
+
+size_t		_sortstack(t_ps_bench *ben, size_t low)
+{
+	size_t		i;
+	size_t		osp;
+	size_t		ret;
+	int			med;
+
+	i = 0;
+	osp = (ben->sa->sp - low) / 2;
+	ret = ben->sa->sp - osp;
+	med = get_median((&ben->sa->stack[low]), ben->sa->sp - low);
+	/*ft_printf("med: %zu, low: %zu, a->sp - 1: %zu\n", a->med, low, a->sp - 1);*/
+	while (ben->sa->sp - low > osp)
+		if (ben->sa->stack[ben->sa->sp - 1] <= med)
+			do_rop(ben, "pb");
+		else
+		{
+			i++;
+			do_rop(ben, "ra");
+		}
+	while (i-- > 0)
+		do_rop(ben, "rra");
+	return (ret);
+}
+
+void	_quicksort(t_ps_bench *ben, size_t low)
+{
+	size_t		osp;
+
+	if (low < ben->sa->sp - 1)
+	{
+		osp = _sortstack(ben, low);
+		/*ft_printf("low: %zu, a->sp: %zu, osp: %zu\nstack a: ", low, a->sp, osp);*/
+		/*print_stack(a);*/
+		/*ft_printf("\nstack b:");*/
+		/*print_stack(b);*/
+		/*ft_putchar('\n');*/
+		_quicksort(ben, low);
+		low = ben->sa->sp;
+		if (osp <= 2 && ben->sb->sp > 1)
+		{
+			if (ben->sb->stack[ben->sb->sp - 1] < ben->sb->stack[ben->sb->sp - 2])
+				do_rop(ben, "sb");
+			do_rop(ben, "pa");
+			do_rop(ben, "pa");
+			low += osp;
+		}
+		else
+			while (osp-- > 0 && ben->sb->sp)
+				do_rop(ben, "pa");
+		_quicksort(ben, low);
+	}
+}
+
+void	smart_rotate_b(t_ps_bench *ben, size_t k)
+{
+	size_t	n;
+
+	n = 0;
+	if (k > ben->sb->sp / 2)
+		while (n++ < ben->sb->sp - k)
+			do_rop(ben, "rrb");
+	else
+		while (n++ < k)
+			do_rop(ben, "rb");
+}
+
+void	_insertion_sort(t_ps_bench *ben)
+{
+	size_t	i;
+	int		min;
+	int		max;
+
+	i = 0;
+	min = ben->sa->stack[ben->sa->sp - 1];
+	max = min;
+	do_rop(ben, "pb");
+	while (ben->sa->sp)
+	{
+		if (ben->sa->stack[ben->sa->sp - 1] > max \
+				|| ben->sa->stack[ben->sa->sp - 1] < min)
+		{
+			while (ben->sb->stack[ben->sb->sp - 1] < ben->sb->stack[0])
+				do_rop(ben, "rb");
+			min = ft_min(ben->sa->stack[ben->sa->sp - 1], min);
+			max = ft_max(ben->sa->stack[ben->sa->sp - 1], max);
+			do_rop(ben, "pb");
+			if (ben->sa->stack[ben->sa->sp - 1] < min)
+				do_rop(ben, "rb");
+		}
+		else
+		{
+			while (ben->sb->stack[ben->sb->sp - 1] < ben->sa->stack[ben->sa->sp - 1])
+				do_rop(ben, "rrb");
+			while (ben->sb->stack[ben->sb->sp - 1] > ben->sa->stack[ben->sa->sp - 1])
+				do_rop(ben, "rb");
+			min = ft_min(ben->sa->stack[ben->sa->sp - 1], min);
+			max = ft_max(ben->sa->stack[ben->sa->sp - 1], max);
+			do_rop(ben, "pb");
+		}
+	}
+	smart_rotate_b(ben, 0);
+	while (ben->sb->stack[ben->sb->sp - 1] < ben->sb->stack[0])
+		do_rop(ben, "rb");
+	while (ben->sb->sp)
+		do_rop(ben, "pa");
 }
 
 void	disp_tab(int *t, int n)
@@ -137,44 +284,6 @@ void	sort(t_dlist **ops, int *lst, int n)
 }
 */
 
-int		do_rop(t_ps_bench *bench, char *op)
-{
-	if (!do_op(bench, op))
-		return (0);
-	push_ops(bench, op);
-	return (1);
-}
-
-int		get_median(int *vals, size_t size)
-{
-	int		*new;
-	int		min;
-	size_t	i;
-	int		sorted;
-
-	if (!(new = (int *)malloc(size * sizeof(int))))
-		return (0);
-	ft_memcpy(new, vals, size * sizeof(int));
-	min = 0;
-	sorted = 0;
-	while (!sorted)
-	{
-		i = 0;
-		sorted = 1;
-		while (i < size - 1)
-		{
-			if (new[i] > new[i + 1])
-			{
-				ft_swap(&(new[i]), &(new[i + 1]), sizeof(*new));
-				sorted = 0;
-			}
-			i++;
-		}
-	}
-	min = new[size / 2 - (size % 2 ? 0 : 1)];
-	free(new);
-	return (min);
-}
 
 size_t		get_loc(t_sstack *sa, int n)
 {
@@ -445,15 +554,17 @@ int		main(int ac, char **av)
 	t_ps_bench	bench;
 
 	if ((vals = parse_args(ac, av, &size, &opts))
-			|| !init_bench(vals, size, &bench))
+			&& init_bench(vals, size, &bench))
 	{
 		//disp_tab(tab, size);
 		//quicksort(&ops, tab, size);
 		//disp_tab(tab, size);
 		//sort(&ops, vals, size);
 		//sort_3(&ops, vals, size);
-		quicksort_stk_wrp(&bench);
+		//quicksort_stk_wrp(&bench);
+		_insertion_sort(&bench);
 		disp_ops(bench.ops);
-	}
+	} else
+		ft_putendl("Damn son !");
 	return (0);
 }
