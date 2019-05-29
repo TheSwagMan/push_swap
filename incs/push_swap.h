@@ -6,7 +6,7 @@
 /*   By: tpotier <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/05/02 16:59:06 by tpotier           #+#    #+#             */
-/*   Updated: 2019/05/21 07:55:58 by tpotier          ###   ########.fr       */
+/*   Updated: 2019/05/29 13:11:14 by tpotier          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 #ifndef PUSH_SWAP_H
@@ -26,12 +26,24 @@
 # define K_NFG	0xFFE433l
 # define K_OFG	0x97566Cl
 
+typedef enum	e_op
+{
+	OP_RR = 0,
+	OP_R
+}				t_op;
+
 typedef struct	s_ps_bench
 {
 	t_dlist		*ops;
 	t_sstack	*sa;
 	t_sstack	*sb;
 }				t_ps_bench;
+
+typedef struct	s_dist
+{
+	size_t		count;
+	t_op		op;
+}				t_dist;
 
 int		*parse_args(int ac, char **av, int *size, int *opts);
 void	disp_stack(t_sstack *sa, t_sstack *sb, char *op, int opts);

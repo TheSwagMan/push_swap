@@ -6,7 +6,7 @@
 /*   By: tpotier <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/05/02 16:58:02 by tpotier           #+#    #+#             */
-/*   Updated: 2019/05/28 22:55:19 by tpotier          ###   ########.fr       */
+/*   Updated: 2019/05/29 13:20:00 by tpotier          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -155,19 +155,34 @@ void	_quicksort(t_ps_bench *ben, size_t low)
 	}
 }
 
-void	smart_rotate_b(t_ps_bench *ben, size_t k)
+t_dist	*init_dist(size_t count, int op)
+{
+	t_dist	*d;
+
+	if (!(d = malloc(sizeof(*d))))
+		return (NULL);
+	d->count = count;
+	d->op = op;
+	return (d);
+}
+
+t_dist	*smart_rotate(t_sstack *s, size_t k)
+{
+	if (k > s->sp / 2)
+		return (init_dist(s->sp - k, OP_RR));
+	return (init_dist(k, OP_R));
+}
+
+void	apply_smart_rotate_b(t_ps_bench *ben, t_dist *d)
 {
 	size_t	n;
 
 	n = 0;
-	if (k > ben->sb->sp / 2)
-	{
-		while (n++ < ben->sb->sp - k)
-			do_rop(ben, "rrb");
-	}
-	else
-		while (n++ < k)
+	while (n++ < d->count)
+		if (d->op == OP_R)
 			do_rop(ben, "rb");
+		else
+			do_rop(ben, "rrb");
 }
 
 void	_insertion_sort(t_ps_bench *ben)
@@ -193,7 +208,7 @@ void	_insertion_sort(t_ps_bench *ben)
 				while (i < ben->sb->sp - 2 && ben->sb->stack[i] < ben->sb->stack[i + 1])
 					i++;
 				if (i)
-					smart_rotate_b(ben, ben->sb->sp - i - 1);
+					apply_smart_rotate_b(ben, smart_rotate(ben->sb, ben->sb->sp - i - 1));
 			}
 			omin = min;
 			min = ft_min(ben->sa->stack[ben->sa->sp - 1], min);
@@ -216,7 +231,7 @@ void	_insertion_sort(t_ps_bench *ben)
 	i = 0;
 	while (i < ben->sb->sp - 2 && ben->sb->stack[i] < ben->sb->stack[i + 1])
 		i++;
-	smart_rotate_b(ben, ben->sb->sp - i - 1);
+	apply_smart_rotate_b(ben, smart_rotate(ben->sb, ben->sb->sp - i - 1));
 	while (ben->sb->sp)
 		do_rop(ben, "pa");
 }
