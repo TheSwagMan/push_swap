@@ -6,22 +6,11 @@
 /*   By: tpotier <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/05/02 16:58:02 by tpotier           #+#    #+#             */
-/*   Updated: 2019/05/29 13:20:00 by tpotier          ###   ########.fr       */
+/*   Updated: 2019/05/31 19:03:45 by tpotier          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "push_swap.h"
-
-void	disp_ops(t_dlist *ops)
-{
-	while (ops && ops->prev)
-		ops = ops->prev;
-	while (ops)
-	{
-		ft_putendl(ops->content);
-		ops = ops->next;
-	}
-}
 
 void	push_ops(t_ps_bench *bench, char *op)
 {
@@ -183,6 +172,46 @@ void	apply_smart_rotate_b(t_ps_bench *ben, t_dist *d)
 			do_rop(ben, "rb");
 		else
 			do_rop(ben, "rrb");
+}
+
+void	_insertion_sort2(t_ps_bench *ben)
+{
+	int		min;
+	int		max;
+	int		omin;
+
+	min = ben->sa->stack[ben->sa->sp - 1];
+	max = min;
+	do_rop(ben, "pb");
+	while (ben->sa->sp)
+	{
+		if (ben->sa->stack[ben->sa->sp - 1] > max \
+				|| ben->sa->stack[ben->sa->sp - 1] < min)
+		{
+			while (ben->sb->stack[ben->sb->sp - 1] < ben->sb->stack[0])
+				do_rop(ben, "rb");
+			omin = min;
+			min = ft_min(ben->sa->stack[ben->sa->sp - 1], min);
+			max = ft_max(ben->sa->stack[ben->sa->sp - 1], max);
+			do_rop(ben, "pb");
+			if (ben->sa->stack[ben->sa->sp - 1] < omin)
+				do_rop(ben, "rb");
+		}
+		else
+		{
+			while (ben->sb->stack[ben->sb->sp - 1] < ben->sa->stack[ben->sa->sp - 1])
+				do_rop(ben, "rrb");
+			while (ben->sb->stack[ben->sb->sp - 1] > ben->sa->stack[ben->sa->sp - 1])
+				do_rop(ben, "rb");
+			min = ft_min(ben->sa->stack[ben->sa->sp - 1], min);
+			max = ft_max(ben->sa->stack[ben->sa->sp - 1], max);
+			do_rop(ben, "pb");
+		}
+	}
+	while (ben->sb->stack[ben->sb->sp - 1] < ben->sb->stack[0])
+		do_rop(ben, "rb");
+	while (ben->sb->sp)
+		do_rop(ben, "pa");
 }
 
 void	_insertion_sort(t_ps_bench *ben)
@@ -583,13 +612,7 @@ int		main(int ac, char **av)
 	if ((vals = parse_args(ac, av, &size, &opts))
 			&& init_bench(vals, size, &bench))
 	{
-		//disp_tab(tab, size);
-		//quicksort(&ops, tab, size);
-		//disp_tab(tab, size);
-		//sort(&ops, vals, size);
-		//sort_3(&ops, vals, size);
-		//quicksort_stk_wrp(&bench);
-		_insertion_sort(&bench);
+		_insertion_sort2(&bench);
 		disp_ops(bench.ops);
 	} else
 		ft_putendl("Damn son !");

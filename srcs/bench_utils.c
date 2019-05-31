@@ -6,7 +6,7 @@
 /*   By: tpotier <tpotier@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/05/21 04:33:55 by tpotier           #+#    #+#             */
-/*   Updated: 2019/05/23 17:56:34 by tpotier          ###   ########.fr       */
+/*   Updated: 2019/05/31 18:48:39 by tpotier          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,6 +15,7 @@
 int		init_bench(int *vals, int size, t_ps_bench *bench)
 {
 	bench->ops = NULL;
+	ft_dlstadd_end(&bench->ops, "");
 	if (!(bench->sa = ft_sstkinit(size)))
 		return (0);
 	if (!(bench->sb = ft_sstkinit(size)))
@@ -28,12 +29,24 @@ int		init_bench(int *vals, int size, t_ps_bench *bench)
 	return (1);
 }
 
-void	bench_step_forward(t_ps_bench *bench)
+int		bench_step_forward(t_ps_bench *bench)
 {
-	(void)bench;
+	if (bench->ops->next)
+	{
+		bench->ops = bench->ops->next;
+		do_op(bench, bench->ops->content);
+		return (1);
+	}
+	return (0);
 }
 
-void	bench_step_backward(t_ps_bench *bench)
+int		bench_step_backward(t_ps_bench *bench)
 {
-	(void)bench;
+	if (bench->ops->prev)
+	{
+		undo_op(bench, bench->ops->content);
+		bench->ops = bench->ops->prev;
+		return (1);
+	}
+	return (0);
 }

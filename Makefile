@@ -6,13 +6,14 @@
 #    By: tpotier <marvin@42.fr>                     +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2019/04/01 16:36:41 by tpotier           #+#    #+#              #
-#    Updated: 2019/05/21 07:49:32 by tpotier          ###   ########.fr        #
+#    Updated: 2019/05/31 18:05:51 by tpotier          ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
 CC = gcc
-FILES1 = checker args_checker stack_utils display bench_utils graphics
-FILES2 = push_swap args_checker stack_utils bench_utils
+FILES1 = checker args_checker stack_utils display bench_utils graphics \
+		 ops_utils
+FILES2 = push_swap args_checker stack_utils bench_utils ops_utils
 IFILES = push_swap.h checker.h
 NAME1 = checker
 NAME2 = push_swap

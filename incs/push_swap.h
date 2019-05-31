@@ -6,7 +6,7 @@
 /*   By: tpotier <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/05/02 16:59:06 by tpotier           #+#    #+#             */
-/*   Updated: 2019/05/29 13:11:14 by tpotier          ###   ########.fr       */
+/*   Updated: 2019/05/31 18:48:50 by tpotier          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 #ifndef PUSH_SWAP_H
@@ -45,13 +45,18 @@ typedef struct	s_dist
 	t_op		op;
 }				t_dist;
 
-int		*parse_args(int ac, char **av, int *size, int *opts);
-void	disp_stack(t_sstack *sa, t_sstack *sb, char *op, int opts);
-int		do_op(t_ps_bench *bench, char *buff);
-int		init_bench(int *vals, int size, t_ps_bench *bench);
-void	free_charpp(char **c);
+int				*parse_args(int ac, char **av, int *size, int *opts);
+void			disp_stack(t_sstack *sa, t_sstack *sb, char *op, int opts);
+int				do_op(t_ps_bench *bench, char *buff);
+int				init_bench(int *vals, int size, t_ps_bench *bench);
+void			free_charpp(char **c);
 
-void	bench_step_forward(t_ps_bench *bench);
-void	bench_step_backward(t_ps_bench *bench);
+void			disp_ops(t_dlist *ops);
+void			do_ops(t_ps_bench *bench);
+void			undo_op(t_ps_bench *bench, char *buff);
+int				do_op(t_ps_bench *bench, char *buff);
+
+int				bench_step_forward(t_ps_bench *bench);
+int				bench_step_backward(t_ps_bench *bench);
 
 #endif

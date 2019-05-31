@@ -2,8 +2,10 @@
 
 #ifdef GRAPHIC_MODE
 
-int		graph_init(t_graph_env *env)
+int		graph_init(t_graph_env *env, t_ps_bench *bench)
 {
+	size_t	i;
+
 	env->win = NULL;
 	env->is_running = 1;
 	env->dir = 1;
@@ -11,6 +13,17 @@ int		graph_init(t_graph_env *env)
 	env->delay = 10;
 	env->paused = 1;
 	env->step = 0;
+	env->vrng.l = bench->sa->stack[0];
+	env->vrng.r = bench->sa->stack[0];
+	i = 0;
+	while (i < bench->sa->sp)
+	{
+		if (env->vrng.l > bench->sa->stack[i])
+			env->vrng.l = bench->sa->stack[i];
+		if (env->vrng.r < bench->sa->stack[i])
+			env->vrng.r = bench->sa->stack[i];
+		i++;
+	}
 	if (SDL_Init(SDL_INIT_VIDEO) < 0 \
 			|| SDL_CreateWindowAndRenderer(1280, 720, \
 				SDL_WINDOW_FULLSCREEN_DESKTOP, &(env->win), &(env->rend)))
@@ -43,9 +56,9 @@ void	graph_events(t_graph_env *env)
 			if (env->event.key.keysym.sym == SDLK_UP)
 				env->delay++;
 			if (env->event.key.keysym.sym == SDLK_LEFT)
-				env->step = -1;
+				env->step -= 1;
 			if (env->event.key.keysym.sym == SDLK_RIGHT)
-				env->step = 1;
+				env->step += 1;
 			if (env->event.key.keysym.sym == SDLK_r)
 				env->dir *= -1;
 		}
@@ -65,15 +78,29 @@ void	graph_refresh(t_graph_env *env, t_ps_bench *bench)
 	r.x /= 2;
 	SDL_SetRenderDrawColor(env->rend, 100, 100, 100, 255);
 	SDL_RenderFillRect(env->rend, &r);
-	i = 0;
 	SDL_GetWindowSize(env->win, NULL, &r.y);
+	i = 0;
 	while (i < bench->sa->sp)
 	{
 		SDL_GetWindowSize(env->win, &r.w, &r.h);
-		r.x = ft_map(bench->sa->stack[i], (t_inter){0, 4}, \
-				(t_inter){r.w / 4, 0});
-		r.w = ft_map(bench->sa->stack[i], (t_inter){0, 4}, \
-				(t_inter){0, r.w / 2});
+		r.x = ft_map(bench->sa->stack[i], env->vrng, (t_inter){r.w / 4, 0});
+		r.w = ft_map(bench->sa->stack[i], env->vrng, (t_inter){10, r.w / 2});
+		r.h /= bench->sa->size;
+		r.y -= r.h;
+		SDL_SetRenderDrawColor(env->rend, 209, 118, 27, 255);
+		SDL_RenderFillRect(env->rend, &r);
+		SDL_SetRenderDrawColor(env->rend, 200, 200, 200, 255);
+		SDL_RenderDrawRect(env->rend, &r);
+		i++;
+	}
+	SDL_GetWindowSize(env->win, NULL, &r.y);
+	i = 0;
+	while (i < bench->sb->sp)
+	{
+		SDL_GetWindowSize(env->win, &r.w, &r.h);
+		r.x = ft_map(bench->sb->stack[i], env->vrng, (t_inter){r.w / 4, 0})
+			+ r.w / 2;
+		r.w = ft_map(bench->sb->stack[i], env->vrng, (t_inter){10, r.w / 2});
 		r.h /= bench->sa->size;
 		r.y -= r.h;
 		SDL_SetRenderDrawColor(env->rend, 209, 118, 27, 255);
@@ -89,8 +116,8 @@ void	graph_loop(t_graph_env *env, t_ps_bench *bench)
 {
 	int	to_wait;
 
-	graph_init(env);
-	to_wait = 0;
+	graph_init(env, bench);
+	to_wait = 1;
 	env->refresh = 1;
 	while (env->is_running)
 	{
@@ -102,15 +129,24 @@ void	graph_loop(t_graph_env *env, t_ps_bench *bench)
 		}
 		else if (!env->paused)
 			to_wait--;
-		if (env->step == 1)
-			bench_step_forward(bench);
-		if (env->step == -1)
-			bench_step_backward(bench);
 		env->refresh = env->step ? 1 : env->refresh;
+		if (env->step >= 1)
+		{
+			if (!bench_step_forward(bench))
+				env->paused = 1;
+			env->step--;
+		}
+		if (env->step <= -1)
+		{
+			if (!bench_step_backward(bench))
+				env->paused = 1;
+			env->step++;
+		}
 		if (env->refresh)
 			graph_refresh(env, bench);
 		env->refresh = 0;
-		SDL_Delay(STEP_DLY);
+		if (env->delay)
+			SDL_Delay(STEP_DLY);
 	}
 	graph_quit(env);
 }

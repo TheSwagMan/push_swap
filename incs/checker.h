@@ -19,6 +19,7 @@ typedef struct		s_graph_env
 	int				refresh;
 	int				step;
 	int				dir;
+	t_inter			vrng;
 }					t_graph_env;
 
 void	graph_loop(t_graph_env *env, t_ps_bench *bench);

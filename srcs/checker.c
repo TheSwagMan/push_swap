@@ -6,7 +6,7 @@
 /*   By: tpotier <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/05/02 16:58:11 by tpotier           #+#    #+#             */
-/*   Updated: 2019/05/21 07:50:30 by tpotier          ###   ########.fr       */
+/*   Updated: 2019/05/31 18:51:37 by tpotier          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -51,8 +51,33 @@ int		parse_ops(t_ps_bench *bench)
 	return (1);
 }*/
 
+int		read_ops(t_ps_bench *bench)
+{
+	char	buff[4];
+	int		n;
+	char	t;
+
+	while ((n = read(0, buff, 3)))
+	{
+		buff[3] = '\0';
+		if (buff[2] == '\n')
+			buff[2] = '\0';
+		else
+		{
+			read(0, &t, 1);
+			if (t != '\n')
+				return (0);
+		}
+		if (!check_op(buff))
+			return (0);
+		ft_dlstadd_end(&bench->ops, ft_strdup(buff));
+	}
+	return (1);
+}
+
 void	disp_steps(void)
 {
+	ft_printf("disp_steps TO IMPLEMENT\n");
 }
 
 int		main(int ac, char **av)
@@ -66,7 +91,8 @@ int		main(int ac, char **av)
 #endif
 
 	if ((vals = parse_args(ac, av, &size, &opts))
-			&& init_bench(vals, size, &bench))
+			&& init_bench(vals, size, &bench)
+			&& read_ops(&bench))
 	{
 		if (opts & OPT_G)
 #ifdef GRAPHIC_MODE
@@ -74,6 +100,7 @@ int		main(int ac, char **av)
 #else
 			disp_steps();
 #endif
+		do_ops(&bench);
 		if (ft_sstkchkord(bench.sa) && !bench.sb->sp)
 			ft_putstr("OK\n");
 		else
