@@ -6,7 +6,7 @@
 /*   By: tpotier <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/05/02 16:58:11 by tpotier           #+#    #+#             */
-/*   Updated: 2019/05/31 18:51:37 by tpotier          ###   ########.fr       */
+/*   Updated: 2019/05/31 19:26:13 by tpotier          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,36 +20,6 @@ int		check_op(char *o)
 			|| ft_strequ("rra", o) || ft_strequ("rrb", o) \
 			|| ft_strequ("rrr", o));
 }
-
-int		parse_ops(t_ps_bench *bench)
-{
-	char	*buff;
-
-	while (ft_getnextline(0, &buff) > 0)
-	{
-		if (!check_op(buff))
-			return (0);
-		ft_dlstadd_end(&(bench->ops), buff);
-	}
-	return (1);
-}
-
-/*int		do_ops(t_sstack *sa, t_sstack *sb, int opts)
-{
-	char	*buff;
-
-	if (opts & OPT_C)
-		disp_stack(sa, sb, NULL, opts);
-	while (ft_getnextline(0, &buff) > 0)
-	{
-		if (!do_op(buff, sa, sb))
-			return (0);
-		if (opts & OPT_C)
-			disp_stack(sa, sb, buff, opts);
-		free(buff);
-	}
-	return (1);
-}*/
 
 int		read_ops(t_ps_bench *bench)
 {
@@ -75,9 +45,20 @@ int		read_ops(t_ps_bench *bench)
 	return (1);
 }
 
-void	disp_steps(void)
+void	disp_steps(t_ps_bench *bench, int opts)
 {
-	ft_printf("disp_steps TO IMPLEMENT\n");
+	while (bench->ops && bench->ops->prev
+			&& ft_strlen(bench->ops->prev->content) > 0)
+		bench->ops = bench->ops->prev;
+	if (bench->ops && !ft_strlen(bench->ops->content))
+		bench->ops = bench->ops->next;
+	disp_stack(bench, opts);
+	while (bench->ops)
+	{
+		do_op(bench, bench->ops->content);
+		disp_stack(bench, opts);
+		bench->ops = bench->ops->next;
+	}
 }
 
 int		main(int ac, char **av)
@@ -98,7 +79,7 @@ int		main(int ac, char **av)
 #ifdef GRAPHIC_MODE
 			graph_loop(&env, &bench);
 #else
-			disp_steps();
+			disp_steps(&bench, opts);
 #endif
 		do_ops(&bench);
 		if (ft_sstkchkord(bench.sa) && !bench.sb->sp)

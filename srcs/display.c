@@ -6,7 +6,7 @@
 /*   By: tpotier <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/05/06 02:46:12 by tpotier           #+#    #+#             */
-/*   Updated: 2019/05/06 03:41:56 by tpotier          ###   ########.fr       */
+/*   Updated: 2019/05/31 19:25:04 by tpotier          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -41,52 +41,32 @@ void	disp_cyl(int n, int max, int min)
 	ft_printf("%K");
 }
 
-void	disp_norm(t_sstack *sa, t_sstack *sb)
-{
-	size_t			i;
-
-	i = sa->size;
-	while (i-- > 0)
-	{
-		if (i < sa->sp)
-			disp_n(sa->stack[i]);
-		else
-			ft_putnchar(' ', G_THK);
-		ft_putnchar(' ', 2);
-		if (i < sb->sp)
-			disp_n(sb->stack[i]);
-		else
-			ft_putnchar(' ', G_THK);
-		ft_putchar('\n');
-	}
-}
-
-void	disp_graph(t_sstack *sa, t_sstack *sb)
+void	disp_graph(t_ps_bench *ben)
 {
 	size_t			i;
 	size_t			min_n;
 	int				max_n;
 
 	i = -1;
-	min_n = sa->stack[0];
-	max_n = sa->stack[0];
-	while (++i < sa->size)
+	min_n = ben->sa->stack[0];
+	max_n = ben->sa->stack[0];
+	while (++i < ben->sa->size)
 	{
-		max_n = ft_max(ft_max(sa->stack[i], sb->stack[i]), max_n);
-		min_n = ft_min(ft_min(sa->stack[i], sb->stack[i]), min_n);
+		max_n = ft_max(ft_max(ben->sa->stack[i], ben->sb->stack[i]), max_n);
+		min_n = ft_min(ft_min(ben->sa->stack[i], ben->sb->stack[i]), min_n);
 	}
 	while (i-- > 0)
 	{
 		ft_printf("%k", K_GBG << K_BG_SHIFT);
-		if (i < sa->sp)
-			disp_cyl(sa->stack[i], max_n, min_n);
+		if (i < ben->sa->sp)
+			disp_cyl(ben->sa->stack[i], max_n, min_n);
 		else
 			ft_putnchar(' ', G_THK);
 		ft_printf("%K");
 		ft_putnchar(' ', 2);
 		ft_printf("%k", K_GBG << K_BG_SHIFT);
-		if (i < sb->sp)
-			disp_cyl(sb->stack[i], max_n, min_n);
+		if (i < ben->sb->sp)
+			disp_cyl(ben->sb->stack[i], max_n, min_n);
 		else
 			ft_putnchar(' ', G_THK);
 		ft_printf("%K");
@@ -94,23 +74,20 @@ void	disp_graph(t_sstack *sa, t_sstack *sb)
 	}
 }
 
-void	disp_stack(t_sstack *sa, t_sstack *sb, char *op, int opts)
+void	disp_stack(t_ps_bench *bench, int opts)
 {
 	int	nw;
 
-	if (opts & OPT_O && op)
+	if (opts & OPT_O)
 	{
-		nw = ft_strlen(op);
+		nw = ft_strlen(bench->ops->content);
 		ft_printf("%k", K_NBG << K_BG_SHIFT | K_NFG | K_M_BOLD);
 		ft_putnchar(' ', (G_THK * 2 + 2 - nw) / 2 + ((G_THK * 2 + 2 - nw) % 2));
-		ft_putstr(op);
+		ft_putstr(bench->ops->content);
 		ft_putnchar(' ', (G_THK * 2 + 2- nw) / 2);
 		ft_printf("%K\n");
 	}
-	if (opts & OPT_G)
-		disp_graph(sa, sb);
-	else
-		disp_norm(sa, sb);
+	disp_graph(bench);
 	ft_printf("%k", K_NBG << K_BG_SHIFT | K_NFG | K_M_BOLD);
 	ft_putnchar(' ', (G_THK - 1) / 2 + ((G_THK - 1) % 2));
 	ft_putchar('A');
