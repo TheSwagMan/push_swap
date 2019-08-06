@@ -6,7 +6,7 @@
 /*   By: tpotier <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/05/02 16:58:02 by tpotier           #+#    #+#             */
-/*   Updated: 2019/08/06 15:26:44 by tpotier          ###   ########.fr       */
+/*   Updated: 2019/08/06 17:39:15 by tpotier          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,7 +18,7 @@ void	push_ops(t_ps_bench *bench, char *op)
 		bench->ops = bench->ops->next;
 	//ft_putstr("Action:");
 	//ft_putendl(op);
-#if 1
+#if 0
 	if (bench->ops && ((ft_strequ(op, "ra") && ft_strequ(bench->ops->content, "rra"))
 			|| (ft_strequ(op, "rra") && ft_strequ(bench->ops->content, "ra"))
 			|| (ft_strequ(op, "rrb") && ft_strequ(bench->ops->content, "rb"))
@@ -174,40 +174,50 @@ void	apply_smart_rotate_b(t_ps_bench *ben, t_dist *d)
 			do_rop(ben, "rrb");
 }
 
+t_dist	rotation_count(int n, t_sstack *s)
+{
+	t_sstack	*sc;
+	t_dist		d;
+
+	d.count = 0;
+	d.op = OP_R;
+	sc = ft_sstkcpy(s);
+	while (sc->sp > 1 && (n < sc->stack[sc->sp - 1] || n > sc->stack[0]) \
+			&& !(sc->stack[0] < sc->stack[sc->sp - 1] \
+				&& (n > sc->stack[sc->sp - 1] || n < sc->stack[0])))
+	{
+		ft_sstkrot(sc);
+		d.count++;
+	}
+	ft_sstkdel(&sc);
+	if (d.count > s->sp / 2)
+	{
+		d.count = s->sp - d.count;
+		d.op = OP_RR;
+	}
+	return (d);
+}
+
 void	_insertion_sort2(t_ps_bench *ben)
 {
 	int		min;
 	int		max;
-	int		omin;
+	/*int		omin;*/
+	t_dist	t;
 
 	min = ben->sa->stack[ben->sa->sp - 1];
 	max = min;
 	do_rop(ben, "pb");
 	while (ben->sa->sp)
 	{
-		if (ben->sa->stack[ben->sa->sp - 1] > max \
-				|| ben->sa->stack[ben->sa->sp - 1] < min)
-		{
-			while (ben->sb->stack[ben->sb->sp - 1] < ben->sb->stack[0])
-				do_rop(ben, "rb");
-			omin = min;
-			min = ft_min(ben->sa->stack[ben->sa->sp - 1], min);
-			max = ft_max(ben->sa->stack[ben->sa->sp - 1], max);
-			do_rop(ben, "pb");
-			if (ben->sa->stack[ben->sa->sp - 1] < omin)
-				do_rop(ben, "rb");
-		}
-		else
-		{
-			while (ben->sb->stack[ben->sb->sp - 1] < ben->sa->stack[ben->sa->sp - 1])
-				do_rop(ben, "rrb");
-			while (ben->sb->stack[ben->sb->sp - 1] > ben->sa->stack[ben->sa->sp - 1])
-				do_rop(ben, "rb");
-			min = ft_min(ben->sa->stack[ben->sa->sp - 1], min);
-			max = ft_max(ben->sa->stack[ben->sa->sp - 1], max);
-			do_rop(ben, "pb");
-		}
+		ft_putchar_fd('\n', 2);
+		t = rotation_count(ben->sa->stack[ben->sa->sp - 1], ben->sb);
+		ft_putnbr_fd(t.count, 2);
+		while (t.count--)
+			do_rop(ben, t.op == OP_R ? "rb" : "rrb");
+		do_rop(ben, "pb");
 	}
+	/*OPTI*/
 	while (ben->sb->stack[ben->sb->sp - 1] < ben->sb->stack[0])
 		do_rop(ben, "rb");
 	while (ben->sb->sp)
