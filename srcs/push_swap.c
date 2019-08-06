@@ -6,7 +6,7 @@
 /*   By: tpotier <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/05/02 16:58:02 by tpotier           #+#    #+#             */
-/*   Updated: 2019/08/06 18:48:13 by tpotier          ###   ########.fr       */
+/*   Updated: 2019/08/06 18:59:47 by tpotier          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,7 +18,7 @@ void	push_ops(t_ps_bench *bench, char *op)
 		bench->ops = bench->ops->next;
 	//ft_putstr("Action:");
 	//ft_putendl(op);
-#if 0
+#if 1
 	if (bench->ops && ((ft_strequ(op, "ra") && ft_strequ(bench->ops->content, "rra"))
 			|| (ft_strequ(op, "rra") && ft_strequ(bench->ops->content, "ra"))
 			|| (ft_strequ(op, "rrb") && ft_strequ(bench->ops->content, "rb"))
@@ -108,7 +108,7 @@ void	_insertion_sort2(t_ps_bench *ben)
 		n = 0;
 		best_score = rotation_count(ben->sa->stack[ben->sa->sp - 1], ben->sb);
 		best_index = 0;
-		while (++n < best_score.count)
+		while (++n < best_score.count && n < ben->sa->sp)
 		{
 			t = rotation_count(ben->sa->stack[ben->sa->sp - 1 - n], ben->sb);
 			if (t.count < best_score.count + n)
