@@ -6,7 +6,7 @@
 /*   By: tpotier <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/05/02 16:58:02 by tpotier           #+#    #+#             */
-/*   Updated: 2019/08/06 18:59:47 by tpotier          ###   ########.fr       */
+/*   Updated: 2019/08/19 14:37:30 by tpotier          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,8 +16,6 @@ void	push_ops(t_ps_bench *bench, char *op)
 {
 	while (bench->ops && bench->ops->next)
 		bench->ops = bench->ops->next;
-	//ft_putstr("Action:");
-	//ft_putendl(op);
 #if 1
 	if (bench->ops && ((ft_strequ(op, "ra") && ft_strequ(bench->ops->content, "rra"))
 			|| (ft_strequ(op, "rra") && ft_strequ(bench->ops->content, "ra"))
@@ -34,17 +32,23 @@ void	push_ops(t_ps_bench *bench, char *op)
 		ft_dlstdel(&(bench->ops), NULL);
 		ft_dlstadd_end(&(bench->ops), "ss");
 	}
-	else if (bench->ops && ((ft_strequ(op, "ra") && ft_strequ(bench->ops->content, "rb"))
-			|| (ft_strequ(op, "rb") && ft_strequ(bench->ops->content, "ra"))))
+	else if (bench->ops && (ft_strequ(op, "ra") || ft_strequ(op, "rb")))
 	{
-		ft_dlstdel(&(bench->ops), NULL);
-		ft_dlstadd_end(&(bench->ops), "rr");
+		ft_putstr_fd("POOP\n", 2);
+		while (ft_strequ(bench->ops->content, "rr") && bench->ops->prev)
+			bench->ops = bench->ops->prev;
+		if ((ft_strequ(op, "ra") && ft_strequ(bench->ops->content, "rb"))
+			|| (ft_strequ(op, "rb") && ft_strequ(bench->ops->content, "ra")))
+			bench->ops->content = "rr";
 	}
-	else if (bench->ops && ((ft_strequ(op, "rra") && ft_strequ(bench->ops->content, "rrb"))
-			|| (ft_strequ(op, "rrb") && ft_strequ(bench->ops->content, "rra"))))
+	else if (bench->ops && (ft_strequ(op, "rra") || ft_strequ(op, "rrb")))
 	{
-		ft_dlstdel(&(bench->ops), NULL);
-		ft_dlstadd_end(&(bench->ops), "rrr");
+		ft_putstr_fd("POOP2\n", 2);
+		while (ft_strequ(bench->ops->content, "rrr") && bench->ops->prev)
+			bench->ops = bench->ops->prev;
+		if ((ft_strequ(op, "rra") && ft_strequ(bench->ops->content, "rrb"))
+			|| (ft_strequ(op, "rrb") && ft_strequ(bench->ops->content, "rra")))
+			bench->ops->content = "rrr";
 	}
 	else
 #endif
@@ -94,7 +98,7 @@ t_dist	rotation_count(int n, t_sstack *s)
 	return (d);
 }
 
-void	_insertion_sort2(t_ps_bench *ben)
+void	insertion_sort(t_ps_bench *ben)
 {
 	size_t	n;
 	t_dist	best_score;
@@ -152,7 +156,7 @@ int		main(int ac, char **av)
 	if ((vals = parse_args(ac, av, &size, &opts))
 			&& init_bench(vals, size, &bench))
 	{
-		_insertion_sort2(&bench);
+		insertion_sort(&bench);
 		disp_ops(bench.ops);
 	} else
 		ft_putendl("Damn son !");
