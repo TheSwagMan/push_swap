@@ -6,7 +6,7 @@
 /*   By: tpotier <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/05/02 16:58:02 by tpotier           #+#    #+#             */
-/*   Updated: 2019/08/19 14:37:30 by tpotier          ###   ########.fr       */
+/*   Updated: 2019/08/19 15:24:18 by tpotier          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,21 +34,23 @@ void	push_ops(t_ps_bench *bench, char *op)
 	}
 	else if (bench->ops && (ft_strequ(op, "ra") || ft_strequ(op, "rb")))
 	{
-		ft_putstr_fd("POOP\n", 2);
-		while (ft_strequ(bench->ops->content, "rr") && bench->ops->prev)
+		while (ft_strequ(bench->ops->content, "rr"))
 			bench->ops = bench->ops->prev;
 		if ((ft_strequ(op, "ra") && ft_strequ(bench->ops->content, "rb"))
 			|| (ft_strequ(op, "rb") && ft_strequ(bench->ops->content, "ra")))
 			bench->ops->content = "rr";
+		else
+			ft_dlstadd_end(&(bench->ops), op);
 	}
 	else if (bench->ops && (ft_strequ(op, "rra") || ft_strequ(op, "rrb")))
 	{
-		ft_putstr_fd("POOP2\n", 2);
-		while (ft_strequ(bench->ops->content, "rrr") && bench->ops->prev)
+		while (ft_strequ(bench->ops->content, "rrr"))
 			bench->ops = bench->ops->prev;
 		if ((ft_strequ(op, "rra") && ft_strequ(bench->ops->content, "rrb"))
 			|| (ft_strequ(op, "rrb") && ft_strequ(bench->ops->content, "rra")))
 			bench->ops->content = "rrr";
+		else
+			ft_dlstadd_end(&(bench->ops), op);
 	}
 	else
 #endif
@@ -105,7 +107,6 @@ void	insertion_sort(t_ps_bench *ben)
 	size_t	best_index;
 	t_dist	t;
 
-
 	do_rop(ben, "pb");
 	while (ben->sa->sp)
 	{
@@ -127,9 +128,15 @@ void	insertion_sort(t_ps_bench *ben)
 			do_rop(ben, best_score.op == OP_R ? "rb" : "rrb");
 		do_rop(ben, "pb");
 	}
-	/*OPTI*/
+	n = 0;
 	while (ben->sb->stack[ben->sb->sp - 1] < ben->sb->stack[0])
-		do_rop(ben, "rb");
+		n++;
+	if (n > ben->sb->sp / 2)
+		while (n++ < ben->sb->sp)
+			do_rop(ben, "rb");
+	else
+		while (n--)
+			do_rop(ben, "rrb");
 	while (ben->sb->sp)
 		do_rop(ben, "pa");
 }
