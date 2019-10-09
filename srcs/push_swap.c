@@ -6,7 +6,7 @@
 /*   By: tpotier <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/05/02 16:58:02 by tpotier           #+#    #+#             */
-/*   Updated: 2019/08/19 15:24:18 by tpotier          ###   ########.fr       */
+/*   Updated: 2019/08/19 16:24:28 by tpotier          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -129,14 +129,15 @@ void	insertion_sort(t_ps_bench *ben)
 		do_rop(ben, "pb");
 	}
 	n = 0;
-	while (ben->sb->stack[ben->sb->sp - 1] < ben->sb->stack[0])
+	while (ben->sb->stack[ben->sb->sp - 1 - n] > ben->sb->stack[ben->sb->sp - n]
+			|| n >= ben->sb->sp - 1)
 		n++;
 	if (n > ben->sb->sp / 2)
 		while (n++ < ben->sb->sp)
-			do_rop(ben, "rb");
+			do_rop(ben, "rrb");
 	else
 		while (n--)
-			do_rop(ben, "rrb");
+			do_rop(ben, "rb");
 	while (ben->sb->sp)
 		do_rop(ben, "pa");
 }
